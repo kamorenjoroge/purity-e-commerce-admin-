@@ -9,7 +9,7 @@ const emptyUser: Omit<User, "id"> = {
   name: "",
   email: "",
   password: "",
-  role: "Editor",
+  role: "Admin",
   status: "active",
   joinedAt: new Date().toISOString().slice(0, 10),
 };

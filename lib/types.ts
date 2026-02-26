@@ -14,12 +14,12 @@ export type Product = {
   name: string;
   slug: string;
   categoryId: string;
-  price: number;
-  originalPrice?: number;
+  price: number; //selling price
+  originalPrice?: number; //buying price - optional
   description: string;
   features: string[];
-  image: string;
-  inStock: boolean;
+  image: string; // URL to product image cloudinary
+  inStock: boolean; 
   badge?: string;
 };
 
@@ -34,7 +34,7 @@ export type BusinessInfo = {
 };
 
 
-export type UserRole = "Super Admin" | "Manager" | "Editor";
+export type UserRole = "Super Admin" | "Admin" ;
 
 export type UserStatus = "active" | "inactive";
 
