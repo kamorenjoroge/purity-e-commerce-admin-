@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { Search, Plus, Pencil, Trash2, X } from "lucide-react";
 import { Product } from "@/lib/types";
-import {
-  products as initialProducts,
-  categories,
-} from "@/lib/mockData";
+import { products as initialProducts, categories } from "@/lib/mockData";
 
 const emptyProduct: Omit<Product, "id"> = {
   name: "",
@@ -32,46 +29,22 @@ const ProductsPage = () => {
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const openAdd = () => {
-    setEditing(null);
-    setForm(emptyProduct);
-    setModalOpen(true);
-  };
-
-  const openEdit = (product: Product) => {
-    setEditing(product);
-    setForm(product);
-    setModalOpen(true);
-  };
+  const openAdd = () => { setEditing(null); setForm(emptyProduct); setModalOpen(true); };
+  const openEdit = (product: Product) => { setEditing(product); setForm(product); setModalOpen(true); };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (editing) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editing.id ? { ...form, id: editing.id } : p
-        )
-      );
+      setProducts((prev) => prev.map((p) => p.id === editing.id ? { ...form, id: editing.id } : p));
     } else {
-      const newProduct: Product = {
-        ...form,
-        id: Date.now().toString(),
-      };
-      setProducts((prev) => [...prev, newProduct]);
+      setProducts((prev) => [...prev, { ...form, id: Date.now().toString() }]);
     }
-
     setModalOpen(false);
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-  };
+  const deleteProduct = (id: string) => setProducts((prev) => prev.filter((p) => p.id !== id));
 
-  const setField = <K extends keyof typeof form>(
-    key: K,
-    value: (typeof form)[K]
-  ) => {
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -81,25 +54,27 @@ const ProductsPage = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Products</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Products</h1>
 
-        <div className="flex gap-3">
-          <div className="relative">
+        <div className="flex gap-2 sm:gap-3">
+          {/* 👇 Search expands to fill on mobile */}
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search..."
-              className="pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring w-48"
+              className="pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring w-full sm:w-44"
             />
           </div>
 
           <button
             onClick={openAdd}
-            className="bg-primary hover:bg-primary-dark text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            className="bg-primary hover:bg-primary-dark text-primary-foreground text-sm font-medium px-3 sm:px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
           >
-            <Plus className="h-4 w-4" /> Add
+            <Plus className="h-4 w-4" />
+            <span>Add</span>
           </button>
         </div>
       </div>
@@ -109,24 +84,24 @@ const ProductsPage = () => {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">
-              <th className="px-4 py-3">Image</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3 hidden lg:table-cell">Category</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3 hidden md:table-cell">Original</th>
-              <th className="px-4 py-3">Stock</th>
-              <th className="px-4 py-3 hidden sm:table-cell">Badge</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              {/* 👇 Image hidden on mobile — shown inside name cell instead */}
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Image</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground">Name</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Category</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground">Price</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Original</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground">Stock</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Badge</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground text-right">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {filtered.map((p) => (
-              <tr
-                key={p.id}
-                className="border-b border-border last:border-0 hover:bg-muted/50"
-              >
-                <td className="px-4 py-3">
+              <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+
+                {/* Image — hidden on mobile */}
+                <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
                   <img
                     src={p.image}
                     alt={p.name}
@@ -134,70 +109,84 @@ const ProductsPage = () => {
                   />
                 </td>
 
-                <td className="px-4 py-3 font-medium text-foreground">
-                  {p.name}
+                {/* 👇 Name cell: on mobile shows image + name + category stacked */}
+                <td className="px-3 sm:px-4 py-3">
+                  <div className="flex items-center gap-2 sm:block">
+                    {/* Thumbnail only on mobile */}
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className="h-8 w-8 rounded object-cover bg-muted shrink-0 sm:hidden"
+                    />
+                    <div>
+                      <span className="font-medium text-foreground block leading-tight">
+                        {p.name}
+                      </span>
+                      {/* Category shown under name on mobile only */}
+                      <span className="text-xs text-muted-foreground lg:hidden">
+                        {getCategoryName(p.categoryId)}
+                      </span>
+                    </div>
+                  </div>
                 </td>
 
-                <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground">
+                <td className="px-3 sm:px-4 py-3 hidden lg:table-cell text-muted-foreground">
                   {getCategoryName(p.categoryId)}
                 </td>
 
-                <td className="px-4 py-3 font-semibold">
-                  ${p.price.toFixed(2)}
+                {/* 👇 Price cell: show original price underneath on mobile */}
+                <td className="px-3 sm:px-4 py-3">
+                  <span className="font-semibold text-foreground block">
+                    ${p.price.toFixed(2)}
+                  </span>
+                  {/* Original price under price on mobile only */}
+                  {p.originalPrice && (
+                    <span className="text-xs text-muted-foreground line-through md:hidden">
+                      ${p.originalPrice.toFixed(2)}
+                    </span>
+                  )}
                 </td>
 
-                <td className="px-4 py-3 hidden md:table-cell line-through text-muted-foreground">
-                  {p.originalPrice
-                    ? `$${p.originalPrice.toFixed(2)}`
-                    : "—"}
+                <td className="px-3 sm:px-4 py-3 hidden md:table-cell line-through text-muted-foreground">
+                  {p.originalPrice ? `$${p.originalPrice.toFixed(2)}` : "—"}
                 </td>
 
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                      p.inStock
-                        ? "bg-primary/10 text-primary"
-                        : "bg-accent/10 text-accent"
-                    }`}
-                  >
-                    {p.inStock ? "In Stock" : "Out"}
+                <td className="px-3 sm:px-4 py-3">
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                    p.inStock
+                      ? "bg-primary/10 text-primary"
+                      : "bg-accent/10 text-accent"
+                  }`}>
+                    {/* 👇 Shorter label on mobile */}
+                    <span className="sm:hidden">{p.inStock ? "✓" : "✗"}</span>
+                    <span className="hidden sm:inline">{p.inStock ? "In Stock" : "Out"}</span>
                   </span>
                 </td>
 
-                <td className="px-4 py-3 hidden sm:table-cell">
+                <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
                   {p.badge ? (
                     <span className="bg-secondary/10 text-secondary text-xs px-2 py-0.5 rounded-full">
                       {p.badge}
                     </span>
-                  ) : (
-                    "—"
-                  )}
+                  ) : "—"}
                 </td>
 
-                <td className="px-4 py-3 text-right space-x-1">
-                  <button
-                    onClick={() => openEdit(p)}
-                    className="p-1.5 rounded hover:bg-muted text-primary"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-
-                  <button
-                    onClick={() => deleteProduct(p.id)}
-                    className="p-1.5 rounded hover:bg-muted text-accent"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <td className="px-3 sm:px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <button onClick={() => openEdit(p)} className="p-1.5 rounded hover:bg-muted text-primary" aria-label="Edit">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => deleteProduct(p.id)} className="p-1.5 rounded hover:bg-muted text-accent" aria-label="Delete">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
 
             {filtered.length === 0 && (
               <tr>
-                <td
-                  colSpan={8}
-                  className="px-4 py-8 text-center text-muted-foreground"
-                >
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                   No products found.
                 </td>
               </tr>
@@ -206,85 +195,102 @@ const ProductsPage = () => {
         </table>
       </div>
 
-      {/* Modal */}
+      {/* 👇 Bottom sheet on mobile, centered modal on sm+ */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-card w-full max-w-lg rounded-xl p-6 relative">
+        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setModalOpen(false)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+              className="absolute top-3 right-3 p-1 text-muted-foreground hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
+
+            {/* Drag handle on mobile */}
+            <div className="w-10 h-1 bg-muted rounded-full mx-auto mb-4 sm:hidden" />
 
             <h2 className="text-lg font-semibold mb-4">
               {editing ? "Edit Product" : "Add Product"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Name */}
-              <input
-                value={form.name}
-                onChange={(e) => setField("name", e.target.value)}
-                placeholder="Product Name"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background"
-                required
-              />
+              {/* 👇 Name + Slug side by side on sm+ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
+                  placeholder="Product Name"
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  required
+                />
+                <input
+                  value={form.slug}
+                  onChange={(e) => setField("slug", e.target.value)}
+                  placeholder="Slug"
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  required
+                />
+              </div>
 
-              {/* Slug */}
-              <input
-                value={form.slug}
-                onChange={(e) => setField("slug", e.target.value)}
-                placeholder="Slug"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background"
-                required
-              />
-
-              {/* Category */}
               <select
                 value={form.categoryId}
-                onChange={(e) =>
-                  setField("categoryId", e.target.value)
-                }
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                onChange={(e) => setField("categoryId", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 required
               >
                 <option value="">Select category</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
+                  <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
 
-              {/* Price */}
+              {/* 👇 Price + Original price side by side on sm+ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={form.price}
+                    onChange={(e) => setField("price", Number(e.target.value))}
+                    placeholder="Price"
+                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Original Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={form.originalPrice ?? ""}
+                    onChange={(e) => setField("originalPrice", e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="Optional"
+                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
               <input
-                type="number"
-                step="0.01"
-                value={form.price}
-                onChange={(e) =>
-                  setField("price", Number(e.target.value))
-                }
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background"
-                required
+                value={form.badge ?? ""}
+                onChange={(e) => setField("badge", e.target.value || undefined)}
+                placeholder="Badge (e.g. New, Sale) — optional"
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
 
-              {/* In Stock */}
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.inStock}
-                  onChange={(e) =>
-                    setField("inStock", e.target.checked)
-                  }
-                  className="accent-primary"
+                  onChange={(e) => setField("inStock", e.target.checked)}
+                  className="accent-primary h-4 w-4"
                 />
                 In Stock
               </label>
 
               <button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary-dark text-primary-foreground py-2 rounded-lg text-sm"
+                className="w-full bg-primary hover:bg-primary-dark active:scale-95 text-primary-foreground font-medium py-2.5 rounded-lg text-sm transition-all mt-1"
               >
                 {editing ? "Update" : "Add"} Product
               </button>

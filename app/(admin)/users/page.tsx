@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, X } from "lucide-react";
 import { User } from "@/lib/types";
 import { mockUsers } from "@/lib/mockData";
 
@@ -20,176 +20,152 @@ export default function UsersPage() {
   const [form, setForm] = useState<Omit<User, "id">>(emptyUser);
   const [showForm, setShowForm] = useState(false);
 
-  const openAdd = () => {
-    setEditing(null);
-    setForm(emptyUser);
-    setShowForm(true);
-  };
-
-  const openEdit = (user: User) => {
-    setEditing(user);
-    setForm(user);
-    setShowForm(true);
-  };
+  const openAdd = () => { setEditing(null); setForm(emptyUser); setShowForm(true); };
+  const openEdit = (user: User) => { setEditing(user); setForm(user); setShowForm(true); };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (editing) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editing.id ? { ...editing, ...form } : u
-        )
-      );
+      setUsers((prev) => prev.map((u) => u.id === editing.id ? { ...editing, ...form } : u));
     } else {
-      const newUser: User = {
-        id: Date.now().toString(),
-        ...form,
-      };
-      setUsers((prev) => [...prev, newUser]);
+      setUsers((prev) => [...prev, { id: Date.now().toString(), ...form }]);
     }
-
     setShowForm(false);
   };
 
-  const deleteUser = (id: string) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
+  const deleteUser = (id: string) => setUsers((prev) => prev.filter((u) => u.id !== id));
 
-  const setField = <K extends keyof typeof form>(
-    key: K,
-    value: (typeof form)[K]
-  ) => {
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Users</h1>
-
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Users</h1>
         <button
           onClick={openAdd}
-          className="bg-primary hover:bg-primary-dark text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-primary hover:bg-primary-dark text-primary-foreground text-sm font-medium px-3 sm:px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Add User
+          <span>Add User</span>
         </button>
       </div>
-
-      {/* Form (Inline instead of Modal) */}
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="mb-6 bg-card border border-border p-4 rounded-xl space-y-3"
-        >
-          <input
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setField("name", e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-            required
-          />
-
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setField("email", e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-            required
-          />
-
-          <select
-            value={form.role}
-            onChange={(e) =>
-              setField("role", e.target.value as User["role"])
-            }
-            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-          >
-            <option>Super Admin</option>
-            <option>Manager</option>
-            <option>Editor</option>
-          </select>
-
-          <select
-            value={form.status}
-            onChange={(e) =>
-              setField("status", e.target.value as User["status"])
-            }
-            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-
-          <button
-            type="submit"
-            className="w-full bg-primary text-primary-foreground py-2 rounded-lg"
-          >
-            {editing ? "Update User" : "Add User"}
-          </button>
-        </form>
-      )}
 
       {/* Table */}
       <div className="bg-card border border-border rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3 hidden md:table-cell">Role</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground">Name</th>
+              {/* 👇 Email hidden on mobile — shown under name instead */}
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Email</th>
+              {/* 👇 Role hidden on mobile */}
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Role</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground">Status</th>
+              <th className="px-3 sm:px-4 py-3 font-medium text-muted-foreground text-right">Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {users.map((u) => (
-              <tr
-                key={u.id}
-                className="border-b border-border last:border-0 hover:bg-muted/50"
-              >
-                <td className="px-4 py-3 font-medium">{u.name}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {u.email}
+              <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                <td className="px-3 sm:px-4 py-3">
+                  <span className="font-medium text-foreground block">{u.name}</span>
+                  {/* 👇 Email + role shown under name on mobile only */}
+                  <span className="text-xs text-muted-foreground sm:hidden">{u.email}</span>
+                  <span className="text-xs text-muted-foreground block md:hidden sm:hidden">{u.role}</span>
                 </td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  {u.role}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${
-                      u.status === "active"
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
+                <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden sm:table-cell">{u.email}</td>
+                <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden md:table-cell">{u.role}</td>
+                <td className="px-3 sm:px-4 py-3">
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    u.status === "active"
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
+                  }`}>
                     {u.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => openEdit(u)}
-                    className="text-primary"
-                  >
-                    <Pencil size={16} />
-                  </button>
-
-                  <button
-                    onClick={() => deleteUser(u.id)}
-                    className="text-accent"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <td className="px-3 sm:px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button onClick={() => openEdit(u)} className="p-1.5 rounded hover:bg-muted text-primary" aria-label="Edit">
+                      <Pencil size={15} />
+                    </button>
+                    <button onClick={() => deleteUser(u.id)} className="p-1.5 rounded hover:bg-muted text-accent" aria-label="Delete">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* 👇 Bottom sheet on mobile, centered modal on sm+ */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-card w-full sm:max-w-md rounded-t-2xl sm:rounded-xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowForm(false)}
+              className="absolute top-3 right-3 p-1 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Drag handle on mobile */}
+            <div className="w-10 h-1 bg-muted rounded-full mx-auto mb-4 sm:hidden" />
+
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              {editing ? "Edit User" : "Add User"}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <input
+                placeholder="Name"
+                value={form.name}
+                onChange={(e) => setField("name", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                required
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) => setField("email", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                autoCapitalize="none"
+                autoCorrect="off"
+                required
+              />
+              <select
+                value={form.role}
+                onChange={(e) => setField("role", e.target.value as User["role"])}
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option>Super Admin</option>
+                <option>Manager</option>
+                <option>Editor</option>
+              </select>
+              <select
+                value={form.status}
+                onChange={(e) => setField("status", e.target.value as User["status"])}
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <button
+                type="submit"
+                className="w-full bg-primary hover:bg-primary-dark text-primary-foreground font-medium py-2.5 rounded-lg text-sm transition-colors mt-1"
+              >
+                {editing ? "Update User" : "Add User"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
